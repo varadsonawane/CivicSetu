@@ -1,0 +1,8 @@
+@import "tailwindcss";
+.civic-popup .leaflet-popup-content {
+  margin: 12px;
+}
+
+.civic-popup .leaflet-popup-content-wrapper {
+  border-radius: 14px;
+}
