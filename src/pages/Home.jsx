@@ -2,6 +2,7 @@ import Navbar from "../components/Navbar/Navbar";
 import Hero from "../components/Hero/Hero";
 import LiveMap from "../components/LiveMap/LiveMap";
 import HowItWorks from "../components/HowItWorks/HowItWorks";
+import ChatBox from "../components/ChatBox/ChatBox";
 
 import { useEffect, useState } from "react";
 
@@ -22,6 +23,7 @@ useEffect(() => {
     <Hero />
     <LiveMap  reports={reports}/>
     <HowItWorks />
+    <ChatBox />
     </>
   )
 }

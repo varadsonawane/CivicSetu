@@ -180,6 +180,17 @@ app.delete("/api/reports/:id", async (req, res) => {
   }
 });
 
+app.post("/api/chat", (req, res) => {
+  const { message } = req.body;
+
+  console.log("Chat message:", message);
+
+  res.json({
+    reply: `I received your message: "${message}"`,
+  });
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
