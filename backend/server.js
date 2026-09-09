@@ -719,8 +719,8 @@ Keep the answer to 1-3 sentences.
     console.error("Chat error:", error);
 
     res.status(500).json({
-      reply: "Sorry, I couldn't process your message.",
-    });
+reply:
+  "CivicSetu AI is currently under maintenance. Please visit again in a little while. Thank you for your patience! 🙏",    });
   }
 });
 
