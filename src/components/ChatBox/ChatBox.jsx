@@ -5,6 +5,7 @@ const ChatBox = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const [userLocation, setUserLocation] = useState(null);
 
 const sendMessage = async () => {
   if (input.trim() === "") return;
@@ -33,6 +34,8 @@ const sendMessage = async () => {
         },
         body: JSON.stringify({
           message: messageToSend,
+          latitude: userLocation?.latitude,
+  longitude: userLocation?.longitude,
         }),
       }
     );
@@ -53,13 +56,39 @@ const sendMessage = async () => {
   }
 };
 
+const getUserLocation = () => {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      setUserLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+    },
+    () => {
+      console.log("Unable to get location.");
+    }
+  );
+};
+
+
+
+
+
+
+
+
+
+
   return (
     <div className="fixed z-5000 bottom-6 right-6 z-50">
 
       {!isOpen && (
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
+            onClick={() => {
+  setIsOpen(true);
+  getUserLocation();
+}}
           className="flex h-14 w-14 items-center justify-center rounded-full bg-sky-600 text-white shadow-lg transition hover:bg-sky-700"
         >
           <MessageCircle size={26} />
