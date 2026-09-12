@@ -116,10 +116,13 @@ const ReportIssue = () => {
     // -----------------------------
 
     try {
-      const response = await fetch("http://localhost:5000/api/reports", {
-        method: "POST",
-        body: formData,
-      });
+  const response = await fetch("http://localhost:5000/api/reports", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+  body: formData,
+});
 
       const data = await response.json();
 

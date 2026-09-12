@@ -1,14 +1,22 @@
 require("dotenv").config();
 
+const jwt = require("jsonwebtoken");
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const { Pool } = require("pg");
 const Groq = require("groq-sdk");
+const authMiddleware = require("./middleware/authMiddleware");
+const adminMiddleware = require("./middleware/adminMiddleware");
+
+const bcrypt = require("bcryptjs");
 
 const app = express();
 
 const PORT = 5000;
+
+
+
 
 // ======================================================
 // GROQ AI
@@ -186,48 +194,58 @@ app.get("/api/test", (req, res) => {
 // CREATE A REPORT
 // ======================================================
 
-app.post("/api/reports", upload.single("photo"), async (req, res) => {
-  try {
-    const {
-      location,
-      category,
-      description,
-      latitude,
-      longitude,
-    } = req.body;
+// ======================================================
+// CREATE A REPORT
+// ======================================================
 
-    const photoUrl = req.file ? req.file.path : null;
-
-    const result = await pool.query(
-      `INSERT INTO reports
-       (location, category, description, latitude, longitude, photo_url)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *`,
-      [
+app.post(
+  "/api/reports",
+  authMiddleware,
+  upload.single("photo"),
+  async (req, res) => {
+    try {
+      const {
         location,
         category,
         description,
         latitude,
         longitude,
-        photoUrl,
-      ]
-    );
+      } = req.body;
 
-    console.log("Report saved successfully!");
+      const photoUrl = req.file ? req.file.path : null;
 
-    res.status(201).json({
-      message: "Report created successfully!",
-      report: result.rows[0],
-    });
+      const result = await pool.query(
+        `INSERT INTO reports
+         (location, category, description, latitude, longitude, photo_url, user_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING *`,
+        [
+          location,
+          category,
+          description,
+          latitude,
+          longitude,
+          photoUrl,
+          req.user.id,
+        ]
+      );
 
-  } catch (error) {
-    console.error("Error saving report:", error);
+      console.log("Report saved successfully!");
 
-    res.status(500).json({
-      message: "Failed to save report.",
-    });
+      res.status(201).json({
+        message: "Report created successfully!",
+        report: result.rows[0],
+      });
+
+    } catch (error) {
+      console.error("Error saving report:", error);
+
+      res.status(500).json({
+        message: "Failed to save report.",
+      });
+    }
   }
-});
+);
 
 // ======================================================
 // GET ALL REPORTS
@@ -250,6 +268,34 @@ app.get("/api/reports", async (req, res) => {
   }
 });
 
+
+
+// ======================================================
+// GET MY REPORTS
+// ======================================================
+
+app.get("/api/reports/my", authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM reports
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+      `,
+      [req.user.id]
+    );
+
+    res.json(result.rows);
+
+  } catch (error) {
+    console.error("Error fetching my reports:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch your reports.",
+    });
+  }
+});
 // ======================================================
 // UPDATE REPORT STATUS
 // ======================================================
@@ -911,6 +957,186 @@ pool.query("SELECT NOW()", (error, result) => {
   } else {
     console.log("Database connected successfully!");
     console.log(result.rows[0]);
+  }
+});
+
+
+// ======================================================
+// AUTHENTICATION
+// ======================================================
+
+app.post("/api/auth/signup", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Check required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "All fields are required.",
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await pool.query(
+      "SELECT id FROM users WHERE email = $1",
+      [email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(409).json({
+        message: "An account with this email already exists.",
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    const result = await pool.query(
+      `
+      INSERT INTO users (name, email, password)
+      VALUES ($1, $2, $3)
+      RETURNING id, name, email, role, created_at
+      `,
+      [name, email, hashedPassword]
+    );
+
+    res.status(201).json({
+      message: "Account created successfully.",
+      user: result.rows[0],
+    });
+
+  } catch (error) {
+    console.error("Signup error:", error);
+
+    res.status(500).json({
+      message: "Something went wrong while creating the account.",
+    });
+  }
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required.",
+      });
+    }
+
+    // Find user
+    const result = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({
+        message: "Invalid email or password.",
+      });
+    }
+
+    const user = result.rows[0];
+
+    // Compare password
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        message: "Invalid email or password.",
+      });
+    }
+
+    // Create JWT
+    const token = jwt.sign(
+      {
+        id: user.id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    res.json({
+      message: "Login successful.",
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+
+  } catch (error) {
+    console.error("Login error:", error);
+
+    res.status(500).json({
+      message: "Something went wrong while logging in.",
+    });
+  }
+});
+
+
+
+
+// ======================================================
+// MIDDLEWARE
+// ======================================================
+
+app.get("/api/auth/test", authMiddleware, (req, res) => {
+  res.json({
+    message: "You are authenticated!",
+    user: req.user,
+  });
+});
+
+
+app.get(
+  "/api/admin/test",
+  authMiddleware,
+  adminMiddleware,
+  (req, res) => {
+    res.json({
+      message: "Welcome Admin!",
+      user: req.user,
+    });
+  }
+);
+
+app.get("/api/auth/me", authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT id, name, email, role, created_at
+      FROM users
+      WHERE id = $1
+      `,
+      [req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    res.json({
+      user: result.rows[0],
+    });
+
+  } catch (error) {
+    console.error("Get current user error:", error);
+
+    res.status(500).json({
+      message: "Something went wrong.",
+    });
   }
 });
 

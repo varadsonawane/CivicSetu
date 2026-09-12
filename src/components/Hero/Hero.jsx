@@ -18,7 +18,7 @@ const Hero = () => {
                         </Link>
 
                         <Link
-                            to="/admin/dashboard"
+                            to="/admin/login"
                             className="rounded-lg border border-sky-500 bg-transparent px-8 py-3 text-sky-600 hover:bg-sky-50"
                         >
                             

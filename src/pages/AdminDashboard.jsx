@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 import {
   BarChart3,
@@ -13,9 +15,8 @@ import {
 import LiveMap from "../components/LiveMap/LiveMap";
 
 const AdminDashboard = () => {
-  // ==================================================
-  // REPORTS STATE
-  // ==================================================
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const [reports, setReports] = useState([]);
 
@@ -26,6 +27,14 @@ const AdminDashboard = () => {
   const [statusFilter, setStatusFilter] =
     useState("All Statuses");
 
+  // ==================================================
+  // LOGOUT
+  // ==================================================
+
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true });
+  };
 
   // ==================================================
   // FETCH REPORTS
@@ -53,7 +62,6 @@ const AdminDashboard = () => {
       );
     }
   };
-
 
   // ==================================================
   // UPDATE REPORT STATUS
@@ -119,47 +127,53 @@ const AdminDashboard = () => {
     }
   };
 
-const deleteReport = async (reportId) => {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this report?"
-  );
+  // ==================================================
+  // DELETE REPORT
+  // ==================================================
 
-  if (!confirmed) {
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `http://localhost:5000/api/reports/${reportId}`,
-      {
-        method: "DELETE",
-      }
+  const deleteReport = async (reportId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this report?"
     );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.message || "Failed to delete report"
-      );
+    if (!confirmed) {
+      return;
     }
 
-    // Remove deleted report from React state
-    setReports((currentReports) =>
-      currentReports.filter(
-        (report) => report.id !== reportId
-      )
-    );
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/reports/${reportId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-    console.log("Deleted:", data);
+      const data = await response.json();
 
-  } catch (error) {
-    console.error(
-      "Delete failed:",
-      error
-    );
-  }
-};
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to delete report"
+        );
+      }
+
+      // Remove deleted report from React state
+      setReports((currentReports) =>
+        currentReports.filter(
+          (report) => report.id !== reportId
+        )
+      );
+
+      console.log("Deleted:", data);
+
+    } catch (error) {
+      console.error(
+        "Delete failed:",
+        error
+      );
+    }
+  };
+
   // ==================================================
   // FETCH REPORTS WHEN DASHBOARD LOADS
   // ==================================================
@@ -167,7 +181,6 @@ const deleteReport = async (reportId) => {
   useEffect(() => {
     fetchReports();
   }, []);
-
 
   // ==================================================
   // STATUS COUNTS
@@ -187,7 +200,6 @@ const deleteReport = async (reportId) => {
     (report) =>
       report.status === "Resolved"
   ).length;
-
 
   // ==================================================
   // FILTER REPORTS
@@ -212,20 +224,17 @@ const deleteReport = async (reportId) => {
           .toLowerCase()
           .includes(searchText);
 
-
       const matchesCategory =
         categoryFilter ===
           "All Categories" ||
         report.category ===
           categoryFilter;
 
-
       const matchesStatus =
         statusFilter ===
           "All Statuses" ||
         report.status ===
           statusFilter;
-
 
       return (
         matchesSearch &&
@@ -235,25 +244,24 @@ const deleteReport = async (reportId) => {
     }
   );
 
-
   // ==================================================
   // RESET FILTERS
   // ==================================================
 
   const resetFilters = () => {
     setSearch("");
+
     setCategoryFilter(
       "All Categories"
     );
+
     setStatusFilter(
       "All Statuses"
     );
   };
 
-
   return (
     <div className="min-h-screen bg-gray-50">
-
 
       {/* ================================================== */}
       {/* HEADER */}
@@ -275,8 +283,8 @@ const deleteReport = async (reportId) => {
 
           </div>
 
-
           <button
+            onClick={handleLogout}
             type="button"
             className="rounded-lg border border-sky-500 px-5 py-2 text-sm font-medium text-sky-600 transition hover:bg-sky-50"
           >
@@ -287,13 +295,11 @@ const deleteReport = async (reportId) => {
 
       </header>
 
-
       {/* ================================================== */}
       {/* STATISTICS */}
       {/* ================================================== */}
 
       <section className="grid grid-cols-1 gap-5 p-6 sm:grid-cols-2 lg:grid-cols-4">
-
 
         {/* TOTAL REPORTS */}
 
@@ -311,7 +317,6 @@ const deleteReport = async (reportId) => {
 
           </div>
 
-
           <div className="ml-auto flex items-center">
 
             <BarChart3
@@ -323,7 +328,6 @@ const deleteReport = async (reportId) => {
           </div>
 
         </div>
-
 
         {/* PENDING */}
 
@@ -341,7 +345,6 @@ const deleteReport = async (reportId) => {
 
           </div>
 
-
           <div className="ml-auto flex items-center">
 
             <CircleAlert
@@ -353,7 +356,6 @@ const deleteReport = async (reportId) => {
           </div>
 
         </div>
-
 
         {/* IN PROGRESS */}
 
@@ -371,7 +373,6 @@ const deleteReport = async (reportId) => {
 
           </div>
 
-
           <div className="ml-auto flex items-center">
 
             <Clock3
@@ -383,7 +384,6 @@ const deleteReport = async (reportId) => {
           </div>
 
         </div>
-
 
         {/* RESOLVED */}
 
@@ -401,7 +401,6 @@ const deleteReport = async (reportId) => {
 
           </div>
 
-
           <div className="ml-auto flex items-center">
 
             <CircleCheck
@@ -416,7 +415,6 @@ const deleteReport = async (reportId) => {
 
       </section>
 
-
       {/* ================================================== */}
       {/* LIVE MAP */}
       {/* ================================================== */}
@@ -430,7 +428,6 @@ const deleteReport = async (reportId) => {
 
       </section>
 
-
       {/* ================================================== */}
       {/* FILTERS & SEARCH */}
       {/* ================================================== */}
@@ -438,7 +435,6 @@ const deleteReport = async (reportId) => {
       <section className="px-6 pb-6">
 
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-
 
           {/* HEADING */}
 
@@ -455,11 +451,9 @@ const deleteReport = async (reportId) => {
 
           </div>
 
-
           {/* FILTER CONTROLS */}
 
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-
 
             {/* SEARCH */}
 
@@ -483,7 +477,6 @@ const deleteReport = async (reportId) => {
               />
 
             </div>
-
 
             {/* CATEGORY */}
 
@@ -527,7 +520,6 @@ const deleteReport = async (reportId) => {
 
             </select>
 
-
             {/* STATUS */}
 
             <select
@@ -558,7 +550,6 @@ const deleteReport = async (reportId) => {
 
             </select>
 
-
             {/* REFRESH */}
 
             <button
@@ -574,7 +565,6 @@ const deleteReport = async (reportId) => {
               </span>
 
             </button>
-
 
             {/* RESET */}
 
@@ -592,7 +582,6 @@ const deleteReport = async (reportId) => {
 
       </section>
 
-
       {/* ================================================== */}
       {/* REPORTS MANAGEMENT */}
       {/* ================================================== */}
@@ -600,7 +589,6 @@ const deleteReport = async (reportId) => {
       <section className="px-6 pb-6">
 
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-
 
           {/* HEADING */}
 
@@ -614,13 +602,11 @@ const deleteReport = async (reportId) => {
 
           </div>
 
-
           {/* TABLE */}
 
           <div className="overflow-x-auto">
 
             <table className="w-full min-w-[1100px]">
-
 
               {/* TABLE HEADER */}
 
@@ -664,7 +650,6 @@ const deleteReport = async (reportId) => {
 
               </thead>
 
-
               {/* TABLE BODY */}
 
               <tbody>
@@ -692,7 +677,6 @@ const deleteReport = async (reportId) => {
                         className="border-b border-gray-100 transition hover:bg-gray-50"
                       >
 
-
                         {/* REPORT ID */}
 
                         <td className="px-6 py-5 text-sm font-medium text-gray-800">
@@ -700,7 +684,6 @@ const deleteReport = async (reportId) => {
                           #{report.id}
 
                         </td>
-
 
                         {/* PHOTO */}
 
@@ -729,7 +712,6 @@ const deleteReport = async (reportId) => {
 
                         </td>
 
-
                         {/* LOCATION */}
 
                         <td className="max-w-[220px] px-6 py-5 text-sm text-gray-700">
@@ -737,7 +719,6 @@ const deleteReport = async (reportId) => {
                           {report.location}
 
                         </td>
-
 
                         {/* CATEGORY */}
 
@@ -751,7 +732,6 @@ const deleteReport = async (reportId) => {
 
                         </td>
 
-
                         {/* DESCRIPTION */}
 
                         <td className="max-w-[250px] px-6 py-5 text-sm text-gray-600">
@@ -763,7 +743,6 @@ const deleteReport = async (reportId) => {
                           </p>
 
                         </td>
-
 
                         {/* DATE */}
 
@@ -781,7 +760,6 @@ const deleteReport = async (reportId) => {
                           )}
 
                         </td>
-
 
                         {/* STATUS */}
 
@@ -805,48 +783,52 @@ const deleteReport = async (reportId) => {
 
                         </td>
 
-
                         {/* ACTIONS */}
 
                         <td className="px-6 py-5">
 
-  <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3">
 
-    <select
-      value={report.status}
-      onChange={(event) =>
-        updateReportStatus(
-          report.id,
-          event.target.value
-        )
-      }
-      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
-    >
-      <option value="Pending">
-        Pending
-      </option>
+                            <select
+                              value={report.status}
+                              onChange={(event) =>
+                                updateReportStatus(
+                                  report.id,
+                                  event.target.value
+                                )
+                              }
+                              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
+                            >
 
-      <option value="In Progress">
-        In Progress
-      </option>
+                              <option value="Pending">
+                                Pending
+                              </option>
 
-      <option value="Resolved">
-        Resolved
-      </option>
-    </select>
+                              <option value="In Progress">
+                                In Progress
+                              </option>
 
+                              <option value="Resolved">
+                                Resolved
+                              </option>
 
-    <button
-      type="button"
-      onClick={() => deleteReport(report.id)}
-      className="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
-    >
-      Delete
-    </button>
+                            </select>
 
-  </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                deleteReport(
+                                  report.id
+                                )
+                              }
+                              className="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                            >
+                              Delete
+                            </button>
 
-</td>
+                          </div>
+
+                        </td>
 
                       </tr>
 
@@ -865,13 +847,11 @@ const deleteReport = async (reportId) => {
 
       </section>
 
-
       {/* ================================================== */}
       {/* ANALYTICS */}
       {/* ================================================== */}
 
       <section className="grid grid-cols-1 gap-6 px-6 pb-8 lg:grid-cols-2">
-
 
         {/* REPORTS BY CATEGORY */}
 
@@ -889,7 +869,6 @@ const deleteReport = async (reportId) => {
 
         </div>
 
-
         {/* PERFORMANCE METRICS */}
 
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -898,9 +877,7 @@ const deleteReport = async (reportId) => {
             Performance Metrics
           </h2>
 
-
           <div className="space-y-6">
-
 
             {/* AVERAGE RESOLUTION TIME */}
 
@@ -915,7 +892,6 @@ const deleteReport = async (reportId) => {
               </span>
 
             </div>
-
 
             {/* RESOLUTION RATE */}
 
@@ -939,7 +915,6 @@ const deleteReport = async (reportId) => {
 
             </div>
 
-
             {/* ACTIVE REPORTS */}
 
             <div className="flex items-center justify-between">
@@ -949,12 +924,13 @@ const deleteReport = async (reportId) => {
               </span>
 
               <span className="font-semibold text-yellow-500">
+
                 {pendingReports +
                   inProgressReports}
+
               </span>
 
             </div>
-
 
             {/* DATABASE STATUS */}
 
@@ -969,7 +945,6 @@ const deleteReport = async (reportId) => {
               </span>
 
             </div>
-
 
           </div>
 

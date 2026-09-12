@@ -1,14 +1,14 @@
 const HowItWorks = () => {
     return (
-        <section className="bg-gray-50 py-16 sm:py-20 lg:py-10">
+        <section id="how-it-works" className="py-16 sm:py-20 lg:py-10">
 
             {/* Section Container */}
             <div className="mx-auto max-w-7xl px-4">
 
                 {/* Heading */}
-                <h2 className="mb-10 text-center text-3xl font-bold text-sky-600 sm:text-4xl">
-                    How It Works
-                </h2>
+               <h2 className="mb-10 mx-auto w-fit rounded-xl border-2 border-gray-400/40 bg-white/30 px-8 py-2 text-center text-3xl font-bold text-sky-600 backdrop-blur-sm sm:text-4xl">
+    How It Works
+</h2>
 
                 {/* Cards */}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
