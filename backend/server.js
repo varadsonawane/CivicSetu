@@ -4,15 +4,23 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const { Pool } = require("pg");
-const { GoogleGenAI } = require("@google/genai");
+const Groq = require("groq-sdk");
 
 const app = express();
 
 const PORT = 5000;
 
-// =========================
+// ======================================================
+// GROQ AI
+// ======================================================
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
+
+// ======================================================
 // PostgreSQL
-// =========================
+// ======================================================
 
 const pool = new Pool({
   user: "postgres",
@@ -22,17 +30,9 @@ const pool = new Pool({
   port: 5432,
 });
 
-// =========================
-// Gemini AI
-// =========================
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
-
-// =========================
+// ======================================================
 // CivicSetu AI Context
-// =========================
+// ======================================================
 
 const civicSetuContext = `
 You are the official AI assistant for CivicSetu.
@@ -152,27 +152,29 @@ IMPORTANT:
 - Keep answers short and conversational.
 - Usually answer in 1-3 sentences.
 - Explain the website flow when the user asks how CivicSetu works.
-- If the user asks about live reports, use the database information provided by the backend.
+- If the user asks about live reports, PostgreSQL is the source of truth.
 `;
 
-// =========================
+// ======================================================
 // Middleware
-// =========================
+// ======================================================
 
 app.use(cors());
 app.use(express.json());
 
 app.use("/uploads", express.static("uploads"));
 
-// =========================
+// ======================================================
 // Multer
-// =========================
+// ======================================================
 
-const upload = multer({ dest: "uploads/" });
+const upload = multer({
+  dest: "uploads/",
+});
 
-// =========================
+// ======================================================
 // Test API
-// =========================
+// ======================================================
 
 app.get("/api/test", (req, res) => {
   res.json({
@@ -180,9 +182,9 @@ app.get("/api/test", (req, res) => {
   });
 });
 
-// =========================
-// Create a Report
-// =========================
+// ======================================================
+// CREATE A REPORT
+// ======================================================
 
 app.post("/api/reports", upload.single("photo"), async (req, res) => {
   try {
@@ -217,6 +219,7 @@ app.post("/api/reports", upload.single("photo"), async (req, res) => {
       message: "Report created successfully!",
       report: result.rows[0],
     });
+
   } catch (error) {
     console.error("Error saving report:", error);
 
@@ -226,9 +229,9 @@ app.post("/api/reports", upload.single("photo"), async (req, res) => {
   }
 });
 
-// =========================
-// Get All Reports
-// =========================
+// ======================================================
+// GET ALL REPORTS
+// ======================================================
 
 app.get("/api/reports", async (req, res) => {
   try {
@@ -237,6 +240,7 @@ app.get("/api/reports", async (req, res) => {
     );
 
     res.json(result.rows);
+
   } catch (error) {
     console.error("Error fetching reports:", error);
 
@@ -246,9 +250,9 @@ app.get("/api/reports", async (req, res) => {
   }
 });
 
-// =========================
-// Update Report Status
-// =========================
+// ======================================================
+// UPDATE REPORT STATUS
+// ======================================================
 
 app.patch("/api/reports/:id/status", async (req, res) => {
   try {
@@ -285,6 +289,7 @@ app.patch("/api/reports/:id/status", async (req, res) => {
       message: "Status updated successfully!",
       report: result.rows[0],
     });
+
   } catch (error) {
     console.error("Error updating status:", error);
 
@@ -294,9 +299,9 @@ app.patch("/api/reports/:id/status", async (req, res) => {
   }
 });
 
-// =========================
-// Delete Report
-// =========================
+// ======================================================
+// DELETE REPORT
+// ======================================================
 
 app.delete("/api/reports/:id", async (req, res) => {
   try {
@@ -319,6 +324,7 @@ app.delete("/api/reports/:id", async (req, res) => {
       message: "Report deleted successfully!",
       report: result.rows[0],
     });
+
   } catch (error) {
     console.error("Error deleting report:", error);
 
@@ -332,9 +338,9 @@ app.delete("/api/reports/:id", async (req, res) => {
 // DATABASE FUNCTIONS FOR CHATBOT
 // ======================================================
 
-// =========================
-// Get Report Statistics
-// =========================
+// ======================================================
+// GET REPORT STATISTICS
+// ======================================================
 
 const getReportStats = async () => {
   const result = await pool.query(`
@@ -349,9 +355,9 @@ const getReportStats = async () => {
   return result.rows[0];
 };
 
-// =========================
-// Get Category Statistics
-// =========================
+// ======================================================
+// GET CATEGORY STATISTICS
+// ======================================================
 
 const getCategoryStats = async () => {
   const result = await pool.query(`
@@ -364,9 +370,9 @@ const getCategoryStats = async () => {
   return result.rows;
 };
 
-// =========================
-// Get Specific Category Count
-// =========================
+// ======================================================
+// GET SPECIFIC CATEGORY COUNT
+// ======================================================
 
 const getCategoryCount = async (category) => {
   const result = await pool.query(
@@ -381,9 +387,9 @@ const getCategoryCount = async (category) => {
   return Number(result.rows[0].count);
 };
 
-// =========================
-// Get Recent Reports
-// =========================
+// ======================================================
+// GET RECENT REPORTS
+// ======================================================
 
 const getRecentReports = async () => {
   const result = await pool.query(`
@@ -404,63 +410,60 @@ const isDatabaseQuestion = (message) => {
   const text = message.toLowerCase().trim();
 
   const databasePatterns = [
-    // Reports / complaints / issues
-    "report",
-    "reports",
-    "complaint",
-    "complaints",
-    "issue",
-    "issues",
-    "problem",
-    "problems",
 
-    // Status
-    "pending",
-    "unresolved",
-    "not resolved",
-    "open complaint",
-    "open complaints",
-    "open issue",
-    "open issues",
+    // Reports
+    "how many reports",
+    "how many complaints",
+    "how many issues",
 
-    "resolved",
-    "resolve",
-    "solved",
-    "completed",
+    "total reports",
+    "total complaints",
+    "total issues",
 
-    "in progress",
-    "being worked on",
-    "under work",
+    // Pending
+    "pending reports",
+    "pending complaints",
+    "pending issues",
 
-    // Counts
-    "how many",
-    "how much",
-    "count",
-    "number of",
-    "total",
+    "unresolved reports",
+    "unresolved complaints",
+    "unresolved issues",
 
-    // Categories / statistics
-    "category",
-    "categories",
+    // Resolved
+    "resolved reports",
+    "resolved complaints",
+    "resolved issues",
+
+    "solved reports",
+    "solved complaints",
+    "solved issues",
+
+    // In Progress
+    "in progress reports",
+    "in progress complaints",
+    "in progress issues",
+
+    // Categories
     "most reported",
-    "most common",
-    "highest number",
+    "most common issue",
+    "most common problem",
+    "most common category",
 
-    // Recent data
-    "recent report",
+    // Statistics
+    "report statistics",
+    "complaint statistics",
+    "issue statistics",
+
+    // Recent
     "recent reports",
-    "latest report",
     "latest reports",
-
-    "recent complaint",
     "recent complaints",
-    "latest complaint",
     "latest complaints",
 
-    // Database-type questions
-    "statistics",
-    "stats",
-    "data"
+    // Data
+    "report data",
+    "complaint data",
+    "issue data",
   ];
 
   return databasePatterns.some((pattern) =>
@@ -477,14 +480,13 @@ const handleDatabaseQuestion = async (message) => {
 
   const stats = await getReportStats();
 
-  // =========================
+  // ====================================================
   // Pending
-  // =========================
+  // ====================================================
 
   if (
     text.includes("pending") ||
-    text.includes("not resolved") ||
-    text.includes("open complaints")
+    text.includes("unresolved")
   ) {
     const count = Number(stats.pending);
 
@@ -495,14 +497,13 @@ const handleDatabaseQuestion = async (message) => {
     return `There are currently ${count} pending reports.`;
   }
 
-  // =========================
+  // ====================================================
   // Resolved
-  // =========================
+  // ====================================================
 
   if (
     text.includes("resolved") ||
-    text.includes("solved") ||
-    text.includes("completed")
+    text.includes("solved")
   ) {
     const count = Number(stats.resolved);
 
@@ -513,14 +514,12 @@ const handleDatabaseQuestion = async (message) => {
     return `There are currently ${count} resolved reports.`;
   }
 
-  // =========================
+  // ====================================================
   // In Progress
-  // =========================
+  // ====================================================
 
   if (
-    text.includes("in progress") ||
-    text.includes("being worked") ||
-    text.includes("under work")
+    text.includes("in progress")
   ) {
     const count = Number(stats.in_progress);
 
@@ -531,27 +530,30 @@ const handleDatabaseQuestion = async (message) => {
     return `There are currently ${count} reports in progress.`;
   }
 
-  // =========================
+  // ====================================================
   // Total Reports
-  // =========================
+  // ====================================================
 
   if (
     text.includes("total reports") ||
     text.includes("total complaints") ||
+    text.includes("total issues") ||
     text.includes("how many reports") ||
-    text.includes("how many complaints")
+    text.includes("how many complaints") ||
+    text.includes("how many issues")
   ) {
     return `There are currently ${stats.total} total reports in CivicSetu.`;
   }
 
-  // =========================
+  // ====================================================
   // Most Reported Category
-  // =========================
+  // ====================================================
 
   if (
     text.includes("most reported") ||
     text.includes("most common problem") ||
-    text.includes("most common issue")
+    text.includes("most common issue") ||
+    text.includes("most common category")
   ) {
     const categories = await getCategoryStats();
 
@@ -564,9 +566,9 @@ const handleDatabaseQuestion = async (message) => {
     return `${topCategory.category} is currently the most reported category, with ${topCategory.count} report(s).`;
   }
 
-  // =========================
+  // ====================================================
   // Category Statistics
-  // =========================
+  // ====================================================
 
   if (
     text.includes("category") ||
@@ -579,13 +581,16 @@ const handleDatabaseQuestion = async (message) => {
     }
 
     return categories
-      .map((item) => `${item.category}: ${item.count}`)
+      .map(
+        (item) =>
+          `${item.category}: ${item.count}`
+      )
       .join("\n");
   }
 
-  // =========================
+  // ====================================================
   // Recent Reports
-  // =========================
+  // ====================================================
 
   if (
     text.includes("latest reports") ||
@@ -607,31 +612,174 @@ const handleDatabaseQuestion = async (message) => {
       .join("\n");
   }
 
-  // =========================
+  // ====================================================
   // General Report Question
-  // =========================
+  // ====================================================
 
-  return `CivicSetu currently has ${stats.total} total reports: ${stats.pending} pending, ${stats.in_progress} in progress, and ${stats.resolved} resolved.`;
+  return `
+CivicSetu currently has ${stats.total} total reports:
+${stats.pending} pending,
+${stats.in_progress} in progress,
+and ${stats.resolved} resolved.
+`;
 };
 
+// ======================================================
+// CIVICSETU KNOWLEDGE ANSWERS
+// ======================================================
 
 const getCivicSetuAnswer = (message) => {
-  const text = message.toLowerCase();
+  const text = message.toLowerCase().trim();
+
+  // ====================================================
+  // Greetings
+  // ====================================================
+
+  if (
+    text === "hi" ||
+    text === "hii" ||
+    text === "hiii" ||
+    text === "hello" ||
+    text === "hey" ||
+    text === "hlo"
+  ) {
+    return "👋 Hello! I'm the CivicSetu Assistant. How can I help you today?";
+  }
+
+  // ====================================================
+  // What is CivicSetu?
+  // ====================================================
 
   if (
     text.includes("what is civicsetu") ||
     text.includes("what is civic setu")
   ) {
-    return "CivicSetu is a civic issue reporting and tracking platform that helps citizens report and track local civic problems.";
+    return "CivicSetu is a civic issue reporting and tracking platform that helps citizens report local civic problems and allows administrators to monitor and manage them.";
   }
 
+  // ====================================================
+  // About CivicSetu
+  // ====================================================
+
   if (
-    text.includes("how does civicsetu work") ||
-    text.includes("how does civic setu work") ||
-    text.includes("how civicsetu works")
+    text.includes("tell about civicsetu") ||
+    text.includes("tell me about civicsetu") ||
+    text.includes("tell about civic setu") ||
+    text.includes("tell me about civic setu") ||
+    text.includes("about civicsetu") ||
+    text.includes("about civic setu")
   ) {
-    return "Citizens submit civic issues with details such as category, description, location and photos. Administrators can then monitor the reports, update their status and manage them through the dashboard.";
+    return "CivicSetu is a civic issue reporting and tracking platform that connects citizens and administrators. Citizens can report local problems, while administrators can monitor and manage those reports.";
   }
+
+  // ====================================================
+  // How does CivicSetu work?
+  // ====================================================
+
+  if (
+    text.includes("how does it work") ||
+    text.includes("how does it works") ||
+    text.includes("how does civicsetu work") ||
+    text.includes("how does civicsetu works") ||
+    text.includes("how civicsetu works") ||
+    text.includes("how civicsetu work") ||
+    text.includes("how does civic setu work") ||
+    text.includes("how does civic setu works") ||
+    text.includes("how does this work") ||
+    text.includes("how this works")
+  ) {
+    return "CivicSetu works in a simple flow: citizens report a civic issue with its category, description, location and photo. The backend stores the report in PostgreSQL, and administrators can monitor it through the dashboard and update its status from Pending to In Progress to Resolved.";
+  }
+
+  // ====================================================
+  // Reporting an Issue
+  // ====================================================
+
+  if (
+    text.includes("how to report") ||
+    text.includes("how can i report") ||
+    text.includes("report an issue") ||
+    text.includes("report issue") ||
+    text.includes("submit a complaint") ||
+    text.includes("submit an issue") ||
+    text.includes("how do i report")
+  ) {
+    return "To report an issue, open the Report Issue page and provide the category, description, location and optionally GPS coordinates and a photo. Submit the form and the report is stored in CivicSetu's database.";
+  }
+
+  // ====================================================
+  // Admin Dashboard
+  // ====================================================
+
+  if (
+    text.includes("admin dashboard") ||
+    text.includes("admin panel") ||
+    text.includes("what can admin") ||
+    text.includes("admin do") ||
+    text.includes("what does admin")
+  ) {
+    return "The Admin Dashboard allows administrators to view, search and filter reports, see them on the map, update their status and delete reports.";
+  }
+
+  // ====================================================
+  // Live Map
+  // ====================================================
+
+  if (
+    text.includes("live map") ||
+    text.includes("map work") ||
+    text.includes("map show") ||
+    text.includes("what does the map") ||
+    text.includes("issue map")
+  ) {
+    return "The CivicSetu live map displays reported civic issues geographically. Red markers represent Pending issues, yellow markers represent In Progress issues, and green markers represent Resolved issues.";
+  }
+
+  // ====================================================
+  // Report Status
+  // ====================================================
+
+  if (
+    text.includes("what does pending mean") ||
+    text.includes("what does in progress mean") ||
+    text.includes("what does resolved mean") ||
+    text.includes("report status") ||
+    text.includes("status mean")
+  ) {
+    return "A report starts as Pending, changes to In Progress when administrators begin handling it, and becomes Resolved when the civic issue has been fixed.";
+  }
+
+  // ====================================================
+  // Features
+  // ====================================================
+
+  if (
+    text.includes("features of civicsetu") ||
+    text.includes("civicsetu features") ||
+    text.includes("what can civicsetu do") ||
+    text === "features"
+  ) {
+    return "CivicSetu provides civic issue reporting, PostgreSQL-based report storage, a live issue map, report status tracking, an admin dashboard and an AI assistant.";
+  }
+
+  // ====================================================
+  // Database / Technology
+  // ====================================================
+
+  if (
+    text.includes("which database") ||
+    text.includes("what database") ||
+    text.includes("database used") ||
+    text.includes("backend used") ||
+    text.includes("technology used") ||
+    text.includes("what technology")
+  ) {
+    return "CivicSetu uses a Node.js and Express backend with PostgreSQL as its database. The frontend communicates with the backend through APIs.";
+  }
+
+  // ====================================================
+  // Creator
+  // ====================================================
 
   if (
     text.includes("who created civicsetu") ||
@@ -639,14 +787,6 @@ const getCivicSetuAnswer = (message) => {
     text.includes("who built civicsetu")
   ) {
     return "CivicSetu was created by Varad Sonawane.";
-  }
-
-  if (
-    text.includes("features of civicsetu") ||
-    text.includes("civicsetu features") ||
-    text.includes("what can civicsetu do")
-  ) {
-    return "CivicSetu provides civic issue reporting, a live issue map, report tracking, an admin dashboard and an AI assistant.";
   }
 
   return null;
@@ -668,7 +808,10 @@ app.post("/api/chat", async (req, res) => {
 
     console.log("User:", message);
 
-    // 1. CivicSetu information
+    // ==================================================
+    // 1. CIVICSETU KNOWLEDGE
+    // ==================================================
+
     const civicSetuAnswer = getCivicSetuAnswer(message);
 
     if (civicSetuAnswer) {
@@ -679,7 +822,10 @@ app.post("/api/chat", async (req, res) => {
       });
     }
 
-    // 2. Database questions
+    // ==================================================
+    // 2. DATABASE QUESTIONS
+    // ==================================================
+
     if (isDatabaseQuestion(message)) {
       console.log("Using PostgreSQL...");
 
@@ -692,41 +838,72 @@ app.post("/api/chat", async (req, res) => {
       });
     }
 
-    // 3. General questions → Gemini
-    console.log("Using Gemini...");
+    // ==================================================
+    // 3. GENERAL QUESTIONS → GROQ
+    // ==================================================
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
-      contents: `
+    console.log("Using Groq...");
+
+    if (!process.env.GROQ_API_KEY) {
+      console.log("GROQ_API_KEY is missing.");
+
+      return res.json({
+        reply:
+          "CivicSetu AI is currently under maintenance. Please visit again in a little while. Thank you for your patience! 🙏",
+      });
+    }
+
+    const response = await groq.chat.completions.create({
+      model: "openai/gpt-oss-20b",
+
+      messages: [
+        {
+          role: "system",
+          content: `
 ${civicSetuContext}
 
-USER QUESTION:
-${message}
+IMPORTANT AI RULES:
 
-Answer directly and briefly.
-Keep the answer to 1-3 sentences.
+- You are the official CivicSetu AI Assistant.
+- Be helpful, friendly and concise.
+- Answer CivicSetu questions based only on the provided CivicSetu information.
+- Do not invent CivicSetu features.
+- Do not invent report statistics.
+- PostgreSQL is the source of truth for live report data.
+- Keep answers to approximately 1-3 sentences.
+- If a question is unrelated to CivicSetu, politely explain that you are mainly designed to assist with CivicSetu.
 `,
-      config: {
-        maxOutputTokens: 100,
-      },
+        },
+        {
+          role: "user",
+          content: message,
+        },
+      ],
+
+      max_completion_tokens: 100,
     });
 
+    const reply =
+      response.choices?.[0]?.message?.content ||
+      "I couldn't generate a response right now.";
+
     return res.json({
-      reply: response.text,
+      reply,
     });
 
   } catch (error) {
     console.error("Chat error:", error);
 
-    res.status(500).json({
-reply:
-  "CivicSetu AI is currently under maintenance. Please visit again in a little while. Thank you for your patience! 🙏",    });
+    return res.status(500).json({
+      reply:
+        "CivicSetu AI is currently under maintenance. Please visit again in a little while. Thank you for your patience! 🙏",
+    });
   }
 });
 
-// =========================
-// Database Connection Test
-// =========================
+// ======================================================
+// DATABASE CONNECTION TEST
+// ======================================================
 
 pool.query("SELECT NOW()", (error, result) => {
   if (error) {
@@ -737,9 +914,9 @@ pool.query("SELECT NOW()", (error, result) => {
   }
 });
 
-// =========================
-// Start Server
-// =========================
+// ======================================================
+// START SERVER
+// ======================================================
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
