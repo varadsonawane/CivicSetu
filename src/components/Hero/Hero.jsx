@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const Hero = () => {
     return (
-        <section className="mx-auto max-w-7xl px-4 pt-10 pb-6 sm:pt-20 sm:pb-8 lg:pt-20  lg:pb-10">
+        <section id="home" className="mx-auto max-w-7xl px-4 pt-10 pb-6 sm:pt-20 sm:pb-8 lg:pt-20  lg:pb-10">
             <div className="flex flex-col items-center justify-center p-10">
                 <div className="text-center space-y-8">
                     <h1 className="text-4xl md:text-6xl font-bold text-sky-600 text-balance" >Report Civic Issues Instantly. Empower Your City.</h1>

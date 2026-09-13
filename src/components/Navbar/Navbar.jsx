@@ -128,13 +128,13 @@ const Navbar = () => {
                         {/* Drawer Navigation */}
                         <div className="flex flex-col gap-7 border-t border-gray-200 px-8 py-8">
 
-                            <Link
-                                to="/"
+                            <a
+                                href="#home"
                                 onClick={() => setIsOpen(false)}
                                 className="text-xl text-gray-700"
                             >
                                 Home
-                            </Link>
+                            </a>
 
                             <a
                                 href="#how-it-works"

@@ -7,6 +7,10 @@ import GradientWaves from "../components/GradientWaves/GradientWaves";
 import { useAuth } from "../context/AuthContext";
 import Dashboard from "./Dashboard";
 import { useEffect, useState } from "react";
+import CitizenMunicipal from "../components/CitizenMunicipal/CitizenMunicipal";
+import About from "../components/About/About";
+import Footer from "../components/Footer/Footer";
+
 
 const Home = () => {
   const { user, loading } = useAuth();
@@ -67,7 +71,13 @@ const Home = () => {
         {/* Show Dashboard only when user is logged in */}
         {user && !loading && <Dashboard />}
 
+        <CitizenMunicipal />
+
+        <About /> 
+
         <ChatBox />
+
+        <Footer />
 
       </div>
 
