@@ -13,7 +13,7 @@ const About = () => {
     return (
         <section
             id="about"
-            className="py-16 sm:py-20 lg:py-24"
+            className="py-16 sm:py-16 lg:py-16"
         >
 
             <div className="mx-auto max-w-7xl px-4">
@@ -35,7 +35,7 @@ const About = () => {
                     ABOUT CIVICSETU
                 ============================== */}
 
-                <div className="mb-10 rounded-3xl border border-sky-100 bg-white/90 p-6 shadow-md sm:p-10">
+                <div className="mb-10 rounded-3xl border border-sky-100 bg-white/90 p-6 shadow-md sm:p-10 transition duration-300 hover:-translate-y-1 hover:shadow-xl">
 
                     <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
 
@@ -168,7 +168,7 @@ const About = () => {
                     ABOUT DEVELOPER
                 ============================== */}
 
-                <div className="rounded-3xl border border-sky-100 bg-white/90 p-6 shadow-md sm:p-10">
+                <div className="rounded-3xl border border-sky-100 bg-white/90 p-6 shadow-md sm:p-10 transition duration-300 hover:-translate-y-1 hover:shadow-xl">
 
                     <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
 

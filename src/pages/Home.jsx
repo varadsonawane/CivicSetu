@@ -34,9 +34,9 @@ const Home = () => {
       {/* Background */}
       <div className="fixed inset-0 z-0">
         <GradientWaves
-          horizonColor="#5227FF"
-          waveColor="#FF9FFC"
-          crestColor="#FFFFFF"
+          horizonColor="#071A33"
+  waveColor="#0B4F8A"
+  crestColor="#38BDF8"
           speed={0.4}
           amplitude={2.5}
           waveScale={0.6}
