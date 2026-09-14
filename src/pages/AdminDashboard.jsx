@@ -79,8 +79,7 @@ const AdminDashboard = () => {
       );
 
       const response = await fetch(
-`${API_URL}/api/reports/${report.id}/status`,
-        {
+  `${API_URL}/api/reports/${reportId}/status`,        {
           method: "PATCH",
 
           headers: {
@@ -142,7 +141,7 @@ const AdminDashboard = () => {
 
     try {
       const response = await fetch(
-        `${API_URL}/api/reports/${report.id}`,
+        `${API_URL}/api/reports/${reportId}`,
         {
           method: "DELETE",
         }
