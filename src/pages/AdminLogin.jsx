@@ -126,7 +126,7 @@ const AdminLogin = () => {
                                 type="password"
                                 value={password}
                                 onChange={(event) => setPassword(event.target.value)}
-                                placeholder="Enter admin password"
+                                placeholder="Enter admin password (Admin@12345)"
                                 className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-sky-500"
                             />
                         </div>
