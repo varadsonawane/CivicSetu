@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
+import { API_URL } from "../../config";
 
 const ChatBox = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,7 +27,7 @@ const sendMessage = async () => {
 
   try {
     const response = await fetch(
-      "http://localhost:5000/api/chat",
+      `${API_URL}/api/chat`,
       {
         method: "POST",
         headers: {

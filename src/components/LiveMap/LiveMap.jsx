@@ -4,7 +4,7 @@ import {
     Marker,
     Popup,
 } from "react-leaflet";
-
+import { API_URL } from "../../config";
 import {
     MapPin,
     CalendarDays,
@@ -194,7 +194,7 @@ const LiveMap = ({ reports = [] }) => {
                                                 {report.photo_url ? (
 
                                                     <img
-                                                        src={`http://localhost:5000/${report.photo_url.replaceAll(
+                                                        src={`${API_URL}/${report.photo_url.replaceAll(
                                                             "\\",
                                                             "/"
                                                         )}`}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { API_URL } from "../config";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -11,7 +12,7 @@ const Dashboard = () => {
   const fetchMyReports = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/reports/my",
+        `${API_URL}/api/reports/my`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

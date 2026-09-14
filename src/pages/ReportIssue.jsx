@@ -8,6 +8,7 @@ import {
   Upload,
   Mic,
 } from "lucide-react";
+import { API_URL } from "../config";
 
 const ReportIssue = () => {
   // -----------------------------
@@ -116,7 +117,7 @@ const ReportIssue = () => {
     // -----------------------------
 
     try {
-  const response = await fetch("http://localhost:5000/api/reports", {
+  const response = await fetch(`${API_URL}/api/reports`, {
   method: "POST",
   headers: {
     Authorization: `Bearer ${localStorage.getItem("token")}`,

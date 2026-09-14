@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import CitizenMunicipal from "../components/CitizenMunicipal/CitizenMunicipal";
 import About from "../components/About/About";
 import Footer from "../components/Footer/Footer";
-
+import { API_URL } from "../config";
 
 const Home = () => {
   const { user, loading } = useAuth();
@@ -18,7 +18,7 @@ const Home = () => {
   const [reports, setReports] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/reports")
+    fetch(`${API_URL}/api/reports`)
       .then((response) => response.json())
       .then((data) => {
         setReports(data);

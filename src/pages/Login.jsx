@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ArrowLeftIcon } from "lucide-react";
 import DotField from "../components/DotField/DotField";
+import { API_URL } from "../config";
+
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -18,7 +20,7 @@ const Login = () => {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/auth/login",
+                `${API_URL}/api/auth/login`,
                 {
                     method: "POST",
                     headers: {

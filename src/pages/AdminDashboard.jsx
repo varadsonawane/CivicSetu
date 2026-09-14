@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-
+import { API_URL } from "../config";
 import {
   BarChart3,
   CircleAlert,
@@ -43,7 +43,7 @@ const AdminDashboard = () => {
   const fetchReports = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/reports"
+        `${API_URL}/api/reports`
       );
 
       if (!response.ok) {
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
       );
 
       const response = await fetch(
-        `http://localhost:5000/api/reports/${reportId}/status`,
+`${API_URL}/api/reports/${report.id}/status`,
         {
           method: "PATCH",
 
@@ -142,7 +142,7 @@ const AdminDashboard = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/reports/${reportId}`,
+        `${API_URL}/api/reports/${report.id}`,
         {
           method: "DELETE",
         }
@@ -692,7 +692,7 @@ const AdminDashboard = () => {
                           {report.photo_url ? (
 
                             <img
-                              src={`http://localhost:5000/${report.photo_url.replaceAll(
+                              src={`${API_URL}/${report.photo_url.replaceAll(
                                 "\\",
                                 "/"
                               )}`}
