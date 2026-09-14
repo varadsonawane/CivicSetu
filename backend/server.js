@@ -13,8 +13,7 @@ const bcrypt = require("bcryptjs");
 
 const app = express();
 
-const PORT = 5000;
-
+const PORT = process.env.PORT || 5000;
 
 
 
@@ -31,11 +30,12 @@ const groq = new Groq({
 // ======================================================
 
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "civicsetu",
-  password: "Varad@8055",
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+
+  ssl:
+    process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : false,
 });
 
 // ======================================================
@@ -1144,6 +1144,6 @@ app.get("/api/auth/me", authMiddleware, async (req, res) => {
 // START SERVER
 // ======================================================
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
