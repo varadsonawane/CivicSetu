@@ -9,6 +9,9 @@ const Groq = require("groq-sdk");
 const authMiddleware = require("./middleware/authMiddleware");
 const adminMiddleware = require("./middleware/adminMiddleware");
 
+const cloudinary = require("cloudinary").v2;
+const fs = require("fs");
+
 const bcrypt = require("bcryptjs");
 
 const app = express();
@@ -16,6 +19,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 
+
+
+
+
+// Cloud images
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // ======================================================
 // GROQ AI
@@ -212,7 +226,17 @@ app.post(
         longitude,
       } = req.body;
 
-      const photoUrl = req.file ? req.file.path : null;
+let photo_url = null;
+
+if (req.file) {
+  const result = await cloudinary.uploader.upload(req.file.path, {
+    folder: "civicsetu/reports",
+  });
+
+  photo_url = result.secure_url;
+
+  fs.unlinkSync(req.file.path);
+}
 
       const result = await pool.query(
         `INSERT INTO reports
@@ -225,7 +249,7 @@ app.post(
           description,
           latitude,
           longitude,
-          photoUrl,
+          photo_url,
           req.user.id,
         ]
       );

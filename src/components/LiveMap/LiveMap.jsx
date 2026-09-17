@@ -194,10 +194,7 @@ const LiveMap = ({ reports = [] }) => {
                                                 {report.photo_url ? (
 
                                                     <img
-                                                        src={`${API_URL}/${report.photo_url.replaceAll(
-                                                            "\\",
-                                                            "/"
-                                                        )}`}
+                                                        src={report.photo_url}
                                                         alt={report.category}
                                                         className="h-full w-full object-cover"
                                                     />

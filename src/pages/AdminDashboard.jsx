@@ -691,10 +691,7 @@ const AdminDashboard = () => {
                           {report.photo_url ? (
 
                             <img
-                              src={`${API_URL}/${report.photo_url.replaceAll(
-                                "\\",
-                                "/"
-                              )}`}
+                              src={report.photo_url}
                               alt={
                                 report.category
                               }
