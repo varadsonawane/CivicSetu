@@ -81,14 +81,19 @@ Password hashed using bcrypt.js
  ↓
 User stored in PostgreSQL
 
+### Login
 
-
-👨‍💻 Developer
-Varad Sonawane
-
-CSE - Artificial Intelligence Student
-Full-Stack Developer | DSA Learner
-
-🔗 Portfolio: https://varadsonawane-portfolio.vercel.app
-🔗 LinkedIn: https://www.linkedin.com/in/varadsonawane
-🔗 GitHub: https://github.com/varadsonawane
+```text
+User
+ ↓
+Login
+ ↓
+Express API
+ ↓
+Password verification
+ ↓
+JWT generated
+ ↓
+Token stored on client
+ ↓
+Protected requests
