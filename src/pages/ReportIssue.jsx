@@ -340,7 +340,7 @@ const ReportIssue = () => {
           </div>
 
           {/* Voice Note */}
-          <div className="mb-7">
+          {/* <div className="mb-7">
             <label className="mb-2 block text-base font-medium text-sky-600">
               Voice Note (Optional)
             </label>
@@ -352,7 +352,7 @@ const ReportIssue = () => {
               <Mic size={22} strokeWidth={2} />
               <span>Upload voice note</span>
             </button>
-          </div>
+          </div> */}
 
           {/* -------------------------------- */}
           {/* Error */}
