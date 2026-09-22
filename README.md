@@ -1,16 +1,94 @@
-# React + Vite
+# 🚀 CivicSetu
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### A Full-Stack Civic Issue Reporting Platform
 
-Currently, two official plugins are available:
+CivicSetu is a full-stack web application designed to make reporting and tracking civic issues more structured, transparent, and accessible.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Citizens can report civic issues such as road damage, garbage, water problems, streetlight issues, and other civic concerns. Administrators can review reports, monitor their locations, and update their status.
 
-## React Compiler
+🌐 **Live Website:** https://trycivicsetu.vercel.app
+Report. Track. Resolve.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 📌 Overview
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The main idea behind CivicSetu is simple:
+
+> **Report → Track → Resolve**
+
+A citizen can create an account, submit a civic issue with its description, location, and photo, and then track the progress of that report.
+
+Administrators have a dedicated dashboard where they can view submitted reports, check their locations, manage reports, and update their status.
+
+---
+
+## ✨ Features
+
+### 👤 Citizen Features
+
+- User registration and login
+- JWT-based authentication
+- Protected user routes
+- Report civic issues
+- Add issue category and description
+- Add location information
+- Upload issue photos
+- View submitted reports
+- Track report status
+- Interactive map for reported issues
+- AI-powered CivicSetu chatbot
+
+### 🏛️ Admin Features
+
+- Dedicated admin login
+- Role-based access
+- Admin dashboard
+- View all submitted reports
+- View report details
+- View report locations on map
+- Update report status
+- Delete reports
+- Monitor civic issues from a centralized dashboard
+
+### 🤖 AI Chatbot
+
+CivicSetu includes an AI-powered chatbot using the Groq API.
+
+The chatbot can:
+
+- Answer questions related to CivicSetu
+- Provide information about the platform
+- Handle relevant civic-related queries
+- Retrieve relevant information from the database for supported questions
+
+---
+
+## 🔐 Authentication Flow
+
+CivicSetu uses JWT-based authentication.
+
+### Signup
+
+```text
+User
+ ↓
+Signup Form
+ ↓
+Express API
+ ↓
+Password hashed using bcrypt.js
+ ↓
+User stored in PostgreSQL
+
+
+
+👨‍💻 Developer
+Varad Sonawane
+
+CSE - Artificial Intelligence Student
+Full-Stack Developer | DSA Learner
+
+🔗 Portfolio: https://varadsonawane-portfolio.vercel.app
+🔗 LinkedIn: https://www.linkedin.com/in/varadsonawane
+🔗 GitHub: https://github.com/varadsonawane
