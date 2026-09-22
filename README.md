@@ -81,9 +81,10 @@ Password hashed using bcrypt.js
  ↓
 User stored in PostgreSQL
 
-### Login
 
-```text
+
+*Login
+
 User
  ↓
 Login
