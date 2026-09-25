@@ -7,6 +7,7 @@ CivicSetu is a full-stack web application designed to make reporting and trackin
 Citizens can report civic issues such as road damage, garbage, water problems, streetlight issues, and other civic concerns. Administrators can review reports, monitor their locations, and update their status.
 
 🌐 **Live Website:** https://trycivicsetu.vercel.app
+
 Report. Track. Resolve.
 
 ---
